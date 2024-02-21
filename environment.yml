@@ -1,0 +1,8 @@
+name: stupid_journal_rankings
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pandas
+  - odfpy
