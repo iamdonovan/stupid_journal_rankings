@@ -45,11 +45,10 @@ def _argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('journallist', action='store', type=str,
                         help='the spreadsheet of journal names and categories')
-    parser.add_argument('-y', '--start_year', action='store', type=int,
-                        help='the start year to use for the rankings (defaults to None)')
+    parser.add_argument('-y', '--years', action='store', type=int, nargs='+', default=None,
+                        help='the years to use for the rankings (defaults to current year)')
 
     # TODO: add a flag/routine to update the journal list based on the codes we find
-    # TODO: add the year(s) we want to do this bullshit for
     return parser
 
 
@@ -60,27 +59,38 @@ def main():
     journal_data = pd.read_excel(args.journallist)
     rank_output = pd.DataFrame()
 
-    if args.start_year is not None:
-        pass
+    if args.years is None:
+        years = [None]
+    else:
+        years = args.years
 
     for ind, row in journal_data.iterrows():
-        code = row['Scimago Category']
+        for year in years:
 
-        if not os.path.exists(os.path.join('rank_sheets', f"{code}.csv")):
-            _download_rank_sheet(code)
+            code = row['Scimago Category']
 
-        rank_sheet = pd.read_csv(os.path.join('rank_sheets', f"{code}.csv"), delimiter=';')
+            if year is None:
+                sheetname = f"{code}.csv"
+            else:
+                sheetname = f"{code}-{year}.csv"
 
-        rank_output.loc[ind, 'Journal'] = row['Journal']
-        rank_output.loc[ind, 'SubjectArea'] = row['Subject Area']
-        rank_output.loc[ind, 'Category'] = row['Category']
+            if not os.path.exists(os.path.join('rank_sheets', sheetname)):
+                _download_rank_sheet(code, year=year)
 
-        rank_output.loc[ind, 'Rank'] = _get_rank(row['Journal'], rank_sheet, code)
-        rank_output.loc[ind, 'CategorySize'] = len(rank_sheet)
+            rank_sheet = pd.read_csv(os.path.join('rank_sheets',sheetname), delimiter=';')
 
-        rank_output.loc[ind, 'Percentile'] = rank_output.loc[ind, 'Rank'] / rank_output.loc[ind, 'CategorySize']
+            rank_output.loc[ind, 'Journal'] = row['Journal']
+            rank_output.loc[ind, 'SubjectArea'] = row['Subject Area']
+            rank_output.loc[ind, 'Category'] = row['Category']
 
-        # TODO: get other stupid journal rankings information (SJR, IF, etc.)
+            rank_output.loc[ind, 'Rank'] = _get_rank(row['Journal'], rank_sheet, code)
+            rank_output.loc[ind, 'CategorySize'] = len(rank_sheet)
+
+            rank_output.loc[ind, 'Year'] = year
+
+            rank_output.loc[ind, 'Percentile'] = rank_output.loc[ind, 'Rank'] / rank_output.loc[ind, 'CategorySize']
+
+            # TODO: get other stupid journal rankings information (SJR, IF, etc.)
 
     rank_output = _get_quartiles(rank_output)
 
