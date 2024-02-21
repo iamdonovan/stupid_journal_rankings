@@ -17,8 +17,8 @@ in **environment.yml** by hand.
 
 ## usage
 
-To run the program, you will need a spreadsheet of journal names (preferably matching the names used by SJR) and 
-corresponding SJR category codes.
+To run the program, you will need a spreadsheet of journal names (`'Journal'`; preferably matching the names used by 
+SJR) and corresponding SJR category codes (`'Scimago Category'`).
 
 Run the program from the repository directory as follows:
 
@@ -26,5 +26,5 @@ Run the program from the repository directory as follows:
     python stupid_journal_rankings.py <spreadsheet>
 ```
 
-This will create a new file, **stupid_journal_rankings.ods**, that contains the rankings, percentiles, and quartile
+This will create a new file, **stupid_journal_rankings.csv**, that contains the rankings, percentiles, and quartile
 rankings for each journal in each category.
