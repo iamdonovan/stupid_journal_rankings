@@ -26,7 +26,7 @@ def _get_index(journal, rank_sheet, sheetname):
     try:
         return rank_sheet.loc[rank_sheet['Title'].str.lower() == journal.lower()].index[0]
     except IndexError as e:
-        print(f"Unable to find {journal} in {code}.")
+        print(f"Unable to find {journal} in {sheetname}.")
         return None
 
 
@@ -85,12 +85,14 @@ def main():
             rank_output.loc[ind, 'SubjectArea'] = row['Subject Area']
             rank_output.loc[ind, 'Category'] = row['Category']
 
+            rank_output.loc[ind, 'Year'] = year
+
             rank_ind = _get_index(row['Journal'], rank_sheet, sheetname)
+            if rank_ind is None:
+                continue
 
             rank_output.loc[ind, 'Rank'] = rank_sheet.loc[rank_ind, 'Rank']
             rank_output.loc[ind, 'CategorySize'] = len(rank_sheet)
-
-            rank_output.loc[ind, 'Year'] = year
 
             rank_output.loc[ind, 'Percentile'] = rank_output.loc[ind, 'Rank'] / rank_output.loc[ind, 'CategorySize']
 
