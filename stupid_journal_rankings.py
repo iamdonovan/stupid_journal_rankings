@@ -24,7 +24,7 @@ def _download_rank_sheet(code, year=None):
 
 def _get_index(journal, rank_sheet, sheetname):
     try:
-        return rank_sheet.loc[rank_sheet['Title'].str.lower() == journal.lower()].index[0]
+        return rank_sheet.loc[rank_sheet['Title'].str.lower() == journal.strip().lower()].index[0]
     except IndexError as e:
         print(f"Unable to find {journal} in {sheetname}.")
         return None
@@ -57,6 +57,8 @@ def main():
     args = parser.parse_args()
 
     journal_data = pd.read_excel(args.journallist)
+    journal_data.dropna(subset='Scimago Category', inplace=True)
+    journal_data['Scimago Category'] = journal_data['Scimago Category'].astype(int)
     rank_output = pd.DataFrame()
 
     if args.years is None:
